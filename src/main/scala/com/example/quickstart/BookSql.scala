@@ -9,8 +9,6 @@ import doobie._
 import doobie.Transactor
 import doobie.implicits._
 
-case class Book(id: Option[Int], name: String, pageCount: Int)
-
 class BookSql(db: Database) {
   private val getBooksQuery: ConnectionIO[List[Book]] = sql"""SELECT * from books""".query[Book].to[List]
   def getBooks(): IO[List[Book]] = db.execute(getBooksQuery)
@@ -23,7 +21,6 @@ class BookSql(db: Database) {
   private def insertBookQuery(book: Book): Update0 = sql"""insert into books(name, pageCount) VALUES (${book.name}, ${book.pageCount})""".update
   def insertBook(book: Book): IO[Book] = db.execute(insertBookQuery(book).run) >>= {id => IO.pure(book.copy(id=Some(id)))}
 }
-
 
 
 class BookDDL(db: Database) {
@@ -42,3 +39,4 @@ DROP TABLE IF EXISTS books
 
   def recreateTable(): IO[Int] = db.execute((dropDBQuery, createDBQuery).mapN(_ + _))
 }
+
